@@ -138,10 +138,19 @@ func buildDefaultTemplate() *template.Template {
 	return template.Must(template.New("default").Parse(defaultTemplateContent))
 }
 
+func isHelpFlagGiven(err error) bool {
+	flags_err, ok := err.(*flags.Error)
+	return ok && flags_err.Type == flags.ErrHelp
+}
+
 func main() {
 	var opts models.Options
 	if _, err := flags.Parse(&opts); err != nil {
-		panic(err)
+		if isHelpFlagGiven(err) {
+			return
+		} else {
+			os.Exit(1)
+		}
 	}
 
 	assetsPath := filepath.Join(opts.ProjectPath, "Assets")
