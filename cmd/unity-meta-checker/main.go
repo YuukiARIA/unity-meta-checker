@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/YuukiARIA/unity-meta-checker/models"
@@ -91,7 +92,7 @@ func collectAssetFiles(rootPath string) (map[string]models.AssetPathInfo, error)
 	return assetPathInfos, err
 }
 
-func validateAssetPaths(assetPathInfos map[string]models.AssetPathInfo) {
+func validateAssetPaths(assetPathInfos map[string]models.AssetPathInfo) ([]string, []string) {
 	checkedAssetPathSet := utils.StringSet{}
 
 	danglingMetaPaths := make([]string, 0)
@@ -107,7 +108,6 @@ func validateAssetPaths(assetPathInfos map[string]models.AssetPathInfo) {
 			}
 		}
 	}
-	fmt.Printf("Dangling Meta Files\n%#v\n", danglingMetaPaths)
 
 	// Enumerate meta-less asset paths
 	for path, info := range assetPathInfos {
@@ -115,7 +115,11 @@ func validateAssetPaths(assetPathInfos map[string]models.AssetPathInfo) {
 			metalessAssetPaths = append(metalessAssetPaths, path)
 		}
 	}
-	fmt.Printf("Meta-less Assets\n%#v\n", metalessAssetPaths)
+
+	sort.Strings(danglingMetaPaths)
+	sort.Strings(metalessAssetPaths)
+
+	return danglingMetaPaths, metalessAssetPaths
 }
 
 func main() {
@@ -132,5 +136,7 @@ func main() {
 		panic(err)
 	}
 
-	validateAssetPaths(assetPathInfos)
+	danglingMetaPaths, metalessAssetPaths := validateAssetPaths(assetPathInfos)
+	fmt.Printf("Dangling Meta Files\n%#v\n", danglingMetaPaths)
+	fmt.Printf("Meta-less Assets\n%#v\n", metalessAssetPaths)
 }
