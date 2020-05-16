@@ -93,7 +93,7 @@ func collectAssetFiles(rootPath string) (map[string]models.AssetPathInfo, error)
 	return assetPathInfos, err
 }
 
-func validateAssetPaths(assetPathInfos map[string]models.AssetPathInfo) ([]string, []string) {
+func validateAssetPaths(assetPathInfos map[string]models.AssetPathInfo) *models.Result {
 	checkedAssetPathSet := utils.StringSet{}
 
 	danglingMetaPaths := make([]string, 0)
@@ -120,7 +120,7 @@ func validateAssetPaths(assetPathInfos map[string]models.AssetPathInfo) ([]strin
 	sort.Strings(danglingMetaPaths)
 	sort.Strings(metalessAssetPaths)
 
-	return danglingMetaPaths, metalessAssetPaths
+	return models.NewResult(danglingMetaPaths, metalessAssetPaths)
 }
 
 const defaultTemplateContent = `### Dangling .meta paths
@@ -161,10 +161,7 @@ func main() {
 		panic(err)
 	}
 
-	danglingMetaPaths, metalessAssetPaths := validateAssetPaths(assetPathInfos)
+	result := validateAssetPaths(assetPathInfos)
 
-	buildDefaultTemplate().Execute(os.Stdout, struct {
-		DanglingMetaPaths  []string
-		MetalessAssetPaths []string
-	}{danglingMetaPaths, metalessAssetPaths})
+	buildDefaultTemplate().Execute(os.Stdout, result)
 }
