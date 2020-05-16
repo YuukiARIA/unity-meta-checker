@@ -5,51 +5,12 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 
 	"github.com/YuukiARIA/unity-meta-checker/models"
 	"github.com/YuukiARIA/unity-meta-checker/render"
 	"github.com/YuukiARIA/unity-meta-checker/utils"
 	"github.com/jessevdk/go-flags"
 )
-
-func isValidAssetPath(path string) bool {
-	if path[len(path)-1] == '~' || strings.ToLower(filepath.Ext(path)) == ".tmp" {
-		return false
-	}
-
-	dirpath, file := filepath.Split(path)
-
-	if file[0] == '.' {
-		return false
-	}
-
-	if len(dirpath) == 0 {
-		return true
-	}
-
-	dirs := strings.Split(dirpath, string(os.PathSeparator))
-
-	for _, dir := range dirs {
-		if len(dir) == 0 {
-			continue
-		}
-		dir = strings.ToLower(dir)
-		if dir[0] == '.' || dir == "cvs" {
-			return false
-		}
-	}
-
-	return true
-}
-
-func isMetaFile(path string) bool {
-	return strings.ToLower(filepath.Ext(path)) == ".meta"
-}
-
-func removeMetaExt(path string) string {
-	return path[:len(path)-len(".meta")]
-}
 
 func collectAssetFiles(rootPath string) (map[string]models.AssetPathInfo, error) {
 	assetPathInfos := make(map[string]models.AssetPathInfo)
@@ -72,7 +33,7 @@ func collectAssetFiles(rootPath string) (map[string]models.AssetPathInfo, error)
 		// process an asset file
 		assetPath := models.AssetPathInfo{
 			Path:             relpath,
-			IsValidAssetPath: isValidAssetPath(relpath),
+			IsValidAssetPath: utils.IsValidAssetPath(relpath),
 			FileInfo:         info,
 		}
 
@@ -80,7 +41,7 @@ func collectAssetFiles(rootPath string) (map[string]models.AssetPathInfo, error)
 			// found a directory
 			assetPath.IsEmpty = true
 		} else {
-			if isMetaFile(relpath) {
+			if utils.IsMetaFile(relpath) {
 				// found a .meta file
 				assetPath.IsMeta = true
 			}
@@ -102,7 +63,7 @@ func validateAssetPaths(assetPathInfos map[string]models.AssetPathInfo) *models.
 	// Enumerate dangling .meta paths
 	for path, info := range assetPathInfos {
 		if info.IsMeta {
-			assetPath := removeMetaExt(path)
+			assetPath := utils.RemoveMetaExt(path)
 			checkedAssetPathSet.Add(assetPath)
 			if _, exists := assetPathInfos[assetPath]; !exists {
 				danglingMetaPaths = append(danglingMetaPaths, path)
