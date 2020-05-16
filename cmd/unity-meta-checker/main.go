@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"text/template"
 
 	"github.com/YuukiARIA/unity-meta-checker/models"
 	"github.com/YuukiARIA/unity-meta-checker/utils"
@@ -122,6 +123,21 @@ func validateAssetPaths(assetPathInfos map[string]models.AssetPathInfo) ([]strin
 	return danglingMetaPaths, metalessAssetPaths
 }
 
+const defaultTemplateContent = `### Dangling .meta paths
+{{- range .DanglingMetaPaths }}
+- {{ . }}
+{{- end }}
+
+### Asset paths without .meta
+{{- range .MetalessAssetPaths }}
+- {{ . }}
+{{- end }}
+`
+
+func buildDefaultTemplate() *template.Template {
+	return template.Must(template.New("default").Parse(defaultTemplateContent))
+}
+
 func main() {
 	var opts models.Options
 	if _, err := flags.Parse(&opts); err != nil {
@@ -146,6 +162,9 @@ func main() {
 	}
 
 	danglingMetaPaths, metalessAssetPaths := validateAssetPaths(assetPathInfos)
-	fmt.Printf("Dangling Meta Files\n%#v\n", danglingMetaPaths)
-	fmt.Printf("Meta-less Assets\n%#v\n", metalessAssetPaths)
+
+	buildDefaultTemplate().Execute(os.Stdout, struct {
+		DanglingMetaPaths  []string
+		MetalessAssetPaths []string
+	}{danglingMetaPaths, metalessAssetPaths})
 }
