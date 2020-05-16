@@ -12,8 +12,8 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
-func collectAssetFiles(rootPath string) (map[string]models.AssetPathInfo, error) {
-	assetPathInfos := make(map[string]models.AssetPathInfo)
+func collectAssetFiles(rootPath string) (map[string]*models.AssetPathInfo, error) {
+	assetPathInfos := make(map[string]*models.AssetPathInfo)
 
 	err := filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
 		if path == rootPath {
@@ -26,12 +26,13 @@ func collectAssetFiles(rootPath string) (map[string]models.AssetPathInfo, error)
 		}
 
 		parent := filepath.Dir(relpath)
-		parentAssetPathInfo := assetPathInfos[parent]
-		parentAssetPathInfo.IsEmpty = false
-		assetPathInfos[parent] = parentAssetPathInfo
+		if parent != "." {
+			// mark parent directory not empty
+			assetPathInfos[parent].IsEmpty = false
+		}
 
 		// process an asset file
-		assetPath := models.AssetPathInfo{
+		assetPath := &models.AssetPathInfo{
 			Path:             relpath,
 			IsValidAssetPath: utils.IsValidAssetPath(relpath),
 			FileInfo:         info,
@@ -54,7 +55,7 @@ func collectAssetFiles(rootPath string) (map[string]models.AssetPathInfo, error)
 	return assetPathInfos, err
 }
 
-func validateAssetPaths(assetPathInfos map[string]models.AssetPathInfo) *models.Result {
+func validateAssetPaths(assetPathInfos map[string]*models.AssetPathInfo) *models.Result {
 	checkedAssetPathSet := utils.StringSet{}
 
 	danglingMetaPaths := make([]string, 0)
