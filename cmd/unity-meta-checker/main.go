@@ -129,6 +129,15 @@ func main() {
 	}
 
 	assetsPath := filepath.Join(opts.ProjectPath, "Assets")
+	stat, err := os.Stat(assetsPath)
+	if os.IsNotExist(err) {
+		fmt.Fprintf(os.Stderr, "ERROR: %s does not exist.\n", assetsPath)
+		os.Exit(1)
+	}
+	if !stat.IsDir() {
+		fmt.Fprintf(os.Stderr, "ERROR: %s is not directory.\n", assetsPath)
+		os.Exit(1)
+	}
 
 	assetPathInfos, err := collectAssetFiles(assetsPath)
 
