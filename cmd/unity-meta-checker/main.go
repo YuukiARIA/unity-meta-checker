@@ -61,8 +61,17 @@ func collectAssetFiles(rootPath string) (map[string]models.AssetPathInfo, error)
 			return err
 		}
 
+		parent := filepath.Dir(relpath)
+		parentAssetPathInfo := assetPathInfos[parent]
+		parentAssetPathInfo.IsEmpty = false
+		assetPathInfos[parent] = parentAssetPathInfo
+
 		// process an asset file
-		assetPath := models.AssetPathInfo{Path: relpath, FileInfo: info}
+		assetPath := models.AssetPathInfo{
+			Path:             relpath,
+			IsValidAssetPath: isValidAssetPath(relpath),
+			FileInfo:         info,
+		}
 
 		if info.IsDir() {
 			// found a directory
