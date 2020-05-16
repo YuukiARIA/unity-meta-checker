@@ -5,6 +5,7 @@ WORKDIR /workspace
 
 ENV CGO_ENABLED 0
 
+RUN go test -v ./...
 RUN go build -o build/unity-meta-checker cmd/unity-meta-checker/main.go
 
 FROM scratch
