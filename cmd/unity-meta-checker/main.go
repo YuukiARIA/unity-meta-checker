@@ -139,8 +139,8 @@ func buildDefaultTemplate() *template.Template {
 }
 
 func isHelpFlagGiven(err error) bool {
-	flags_err, ok := err.(*flags.Error)
-	return ok && flags_err.Type == flags.ErrHelp
+	flagsErr, ok := err.(*flags.Error)
+	return ok && flagsErr.Type == flags.ErrHelp
 }
 
 func main() {
