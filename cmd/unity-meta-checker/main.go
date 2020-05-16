@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/YuukiARIA/unity-meta-checker/models"
+	"github.com/YuukiARIA/unity-meta-checker/utils"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -90,6 +91,33 @@ func collectAssetFiles(rootPath string) (map[string]models.AssetPathInfo, error)
 	return assetPathInfos, err
 }
 
+func validateAssetPaths(assetPathInfos map[string]models.AssetPathInfo) {
+	checkedAssetPathSet := utils.StringSet{}
+
+	danglingMetaPaths := make([]string, 0)
+	metalessAssetPaths := make([]string, 0)
+
+	// Enumerate dangling .meta paths
+	for path, info := range assetPathInfos {
+		if info.IsMeta {
+			assetPath := removeMetaExt(path)
+			checkedAssetPathSet.Add(assetPath)
+			if _, exists := assetPathInfos[assetPath]; !exists {
+				danglingMetaPaths = append(danglingMetaPaths, path)
+			}
+		}
+	}
+	fmt.Printf("Dangling Meta Files\n%#v\n", danglingMetaPaths)
+
+	// Enumerate meta-less asset paths
+	for path, info := range assetPathInfos {
+		if !info.IsMeta && info.IsValidAssetPath && !checkedAssetPathSet.Contains(path) {
+			metalessAssetPaths = append(metalessAssetPaths, path)
+		}
+	}
+	fmt.Printf("Meta-less Assets\n%#v\n", metalessAssetPaths)
+}
+
 func main() {
 	var opts models.Options
 	if _, err := flags.Parse(&opts); err != nil {
@@ -104,5 +132,5 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("%#v\n", assetPathInfos)
+	validateAssetPaths(assetPathInfos)
 }
