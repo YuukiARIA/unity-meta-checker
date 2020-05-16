@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -47,7 +48,9 @@ func removeMetaExt(path string) string {
 	return path[:len(path)-len(".meta")]
 }
 
-func collectAssetFiles(rootPath string) error {
+func collectAssetFiles(rootPath string) (map[string]models.AssetPathInfo, error) {
+	assetPathInfos := make(map[string]models.AssetPathInfo)
+
 	err := filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
 		if path == rootPath {
 			return nil
@@ -59,18 +62,23 @@ func collectAssetFiles(rootPath string) error {
 		}
 
 		// process an asset file
+		assetPath := models.AssetPathInfo{Path: relpath, FileInfo: info}
 
 		if info.IsDir() {
 			// found a directory
+			assetPath.IsEmpty = true
 		} else {
 			if isMetaFile(relpath) {
 				// found a .meta file
+				assetPath.IsMeta = true
 			}
 		}
+
+		assetPathInfos[relpath] = assetPath
 		return nil
 	})
 
-	return err
+	return assetPathInfos, err
 }
 
 func main() {
@@ -81,9 +89,11 @@ func main() {
 
 	assetsPath := filepath.Join(opts.ProjectPath, "Assets")
 
-	err := collectAssetFiles(assetsPath)
+	assetPathInfos, err := collectAssetFiles(assetsPath)
 
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Printf("%#v\n", assetPathInfos)
 }
