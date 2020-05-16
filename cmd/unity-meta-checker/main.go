@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"text/template"
 
 	"github.com/YuukiARIA/unity-meta-checker/models"
+	"github.com/YuukiARIA/unity-meta-checker/render"
 	"github.com/YuukiARIA/unity-meta-checker/utils"
 	"github.com/jessevdk/go-flags"
 )
@@ -123,21 +123,6 @@ func validateAssetPaths(assetPathInfos map[string]models.AssetPathInfo) *models.
 	return models.NewResult(danglingMetaPaths, metalessAssetPaths)
 }
 
-const defaultTemplateContent = `### Dangling .meta paths
-{{- range .DanglingMetaPaths }}
-- {{ . }}
-{{- end }}
-
-### Asset paths without .meta
-{{- range .MetalessAssetPaths }}
-- {{ . }}
-{{- end }}
-`
-
-func buildDefaultTemplate() *template.Template {
-	return template.Must(template.New("default").Parse(defaultTemplateContent))
-}
-
 func isHelpFlagGiven(err error) bool {
 	flagsErr, ok := err.(*flags.Error)
 	return ok && flagsErr.Type == flags.ErrHelp
@@ -179,7 +164,8 @@ func main() {
 		}
 		fmt.Fprintf(os.Stderr, "Write result to %s\n", opts.Output)
 	}
-	buildDefaultTemplate().Execute(output, result)
+	t := render.GetDefaultTemplate()
+	render.RenderResult(result, t, output)
 
 	if opts.RaiseError && result.HasContent() {
 		os.Exit(1)
