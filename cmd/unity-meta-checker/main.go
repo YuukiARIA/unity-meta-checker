@@ -180,4 +180,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Write result to %s\n", opts.Output)
 	}
 	buildDefaultTemplate().Execute(output, result)
+
+	if opts.RaiseError && result.HasContent() {
+		os.Exit(1)
+	}
 }
