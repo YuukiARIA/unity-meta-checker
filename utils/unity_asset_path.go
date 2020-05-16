@@ -11,17 +11,7 @@ func IsValidAssetPath(path string) bool {
 		return false
 	}
 
-	dirpath, file := filepath.Split(path)
-
-	if file[0] == '.' {
-		return false
-	}
-
-	if len(dirpath) == 0 {
-		return true
-	}
-
-	dirs := strings.Split(dirpath, string(os.PathSeparator))
+	dirs := strings.Split(path, string(os.PathSeparator))
 
 	for _, dir := range dirs {
 		if len(dir) == 0 {
@@ -37,7 +27,8 @@ func IsValidAssetPath(path string) bool {
 }
 
 func IsMetaFile(path string) bool {
-	return strings.ToLower(filepath.Ext(path)) == ".meta"
+	name := strings.ToLower(filepath.Base(path))
+	return name != ".meta" && filepath.Ext(name) == ".meta"
 }
 
 func RemoveMetaExt(path string) string {
