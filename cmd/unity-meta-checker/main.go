@@ -163,5 +163,12 @@ func main() {
 
 	result := validateAssetPaths(assetPathInfos)
 
-	buildDefaultTemplate().Execute(os.Stdout, result)
+	output := os.Stdout
+	if len(opts.Output) > 0 {
+		if output, err = os.Create(opts.Output); err != nil {
+			panic(err)
+		}
+		fmt.Fprintf(os.Stderr, "Write result to %s\n", opts.Output)
+	}
+	buildDefaultTemplate().Execute(output, result)
 }
