@@ -12,24 +12,13 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
-func buildAssetPathInfo(assetPath string, info os.FileInfo) *models.AssetPathInfo {
-	assetPathInfo := &models.AssetPathInfo{
+func buildAssetPathInfo(assetPath string, isDir bool) *models.AssetPathInfo {
+	return &models.AssetPathInfo{
 		Path:             assetPath,
 		IsValidAssetPath: utils.IsValidAssetPath(assetPath),
-		FileInfo:         info,
+		IsMeta:           !isDir && utils.IsMetaFile(assetPath),
+		IsEmpty:          isDir, // if directory, initially regard as empty
 	}
-
-	if info.IsDir() {
-		// found a directory
-		assetPathInfo.IsEmpty = true
-	} else {
-		if utils.IsMetaFile(assetPath) {
-			// found a .meta file
-			assetPathInfo.IsMeta = true
-		}
-	}
-
-	return assetPathInfo
 }
 
 func collectAssetFiles(rootPath string) (map[string]*models.AssetPathInfo, error) {
@@ -51,7 +40,7 @@ func collectAssetFiles(rootPath string) (map[string]*models.AssetPathInfo, error
 			assetPathInfos[parent].IsEmpty = false
 		}
 
-		assetPathInfos[relpath] = buildAssetPathInfo(relpath, info)
+		assetPathInfos[relpath] = buildAssetPathInfo(relpath, info.IsDir())
 		return nil
 	})
 
