@@ -17,7 +17,6 @@ func buildAssetPathInfo(assetPath string, isDir bool) *models.AssetPathInfo {
 		Path:             assetPath,
 		IsValidAssetPath: utils.IsValidAssetPath(assetPath),
 		IsMeta:           !isDir && utils.IsMetaFile(assetPath),
-		IsEmpty:          isDir, // if directory, initially regard as empty
 	}
 }
 
@@ -32,12 +31,6 @@ func collectAssetFiles(rootPath string) (map[string]*models.AssetPathInfo, error
 		relpath, err := filepath.Rel(rootPath, path)
 		if err != nil {
 			return err
-		}
-
-		parent := filepath.Dir(relpath)
-		if parent != "." {
-			// mark parent directory not empty
-			assetPathInfos[parent].IsEmpty = false
 		}
 
 		assetPathInfos[relpath] = buildAssetPathInfo(relpath, info.IsDir())
