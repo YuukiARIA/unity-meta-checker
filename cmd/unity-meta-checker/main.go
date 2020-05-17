@@ -12,14 +12,6 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
-func buildAssetPathInfo(assetPath string, isDir bool) *models.AssetPathInfo {
-	return &models.AssetPathInfo{
-		Path:             assetPath,
-		IsValidAssetPath: utils.IsValidAssetPath(assetPath),
-		IsMeta:           !isDir && utils.IsMetaFile(assetPath),
-	}
-}
-
 func collectAssetFiles(rootPath string) (map[string]*models.AssetPathInfo, error) {
 	assetPathInfos := make(map[string]*models.AssetPathInfo)
 
@@ -33,7 +25,7 @@ func collectAssetFiles(rootPath string) (map[string]*models.AssetPathInfo, error
 			return err
 		}
 
-		assetPathInfos[relpath] = buildAssetPathInfo(relpath, info.IsDir())
+		assetPathInfos[relpath] = models.NewAssetPathInfo(relpath, info.IsDir())
 		return nil
 	})
 
