@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -63,6 +64,22 @@ func validateAssetPaths(assetPathInfos map[string]*models.AssetPathInfo) *models
 	return models.NewResult(danglingMetaPaths, metalessAssetPaths)
 }
 
+func renderResult(result *models.Result, output io.Writer, customTemplatePath string) error {
+	var t *template.Template
+
+	if customTemplatePath != "" {
+		customTemplate, err := render.LoadTemplate(customTemplatePath)
+		if err != nil {
+			return err
+		}
+		t = customTemplate
+	} else {
+		t = render.GetDefaultTemplate()
+	}
+
+	return render.RenderResult(result, t, output)
+}
+
 func isHelpFlagGiven(err error) bool {
 	flagsErr, ok := err.(*flags.Error)
 	return ok && flagsErr.Type == flags.ErrHelp
@@ -105,17 +122,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Write result to %s\n", opts.Output)
 	}
 
-	var t *template.Template
-	if opts.TemplatePath != "" {
-		t, err = render.LoadTemplate(opts.TemplatePath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
-			os.Exit(1)
-		}
-	} else {
-		t = render.GetDefaultTemplate()
-	}
-	if err := render.RenderResult(result, t, output); err != nil {
+	if err := renderResult(result, output, opts.TemplatePath); err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
 		os.Exit(1)
 	}
