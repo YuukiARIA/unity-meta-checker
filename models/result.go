@@ -10,5 +10,5 @@ func NewResult(danglingMetaPaths, metalessAssetPaths []string) *Result {
 }
 
 func (r *Result) HasContent() bool {
-	return len(r.DanglingMetaPaths) > 0 && len(r.MetalessAssetPaths) > 0
+	return len(r.DanglingMetaPaths) > 0 || len(r.MetalessAssetPaths) > 0
 }
