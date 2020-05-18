@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"text/template"
 
 	"github.com/YuukiARIA/unity-meta-checker/models"
 	"github.com/YuukiARIA/unity-meta-checker/render"
@@ -103,8 +104,21 @@ func main() {
 		}
 		fmt.Fprintf(os.Stderr, "Write result to %s\n", opts.Output)
 	}
-	t := render.GetDefaultTemplate()
-	render.RenderResult(result, t, output)
+
+	var t *template.Template
+	if opts.TemplatePath != "" {
+		t, err = render.LoadTemplate(opts.TemplatePath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
+			os.Exit(1)
+		}
+	} else {
+		t = render.GetDefaultTemplate()
+	}
+	if err := render.RenderResult(result, t, output); err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
+		os.Exit(1)
+	}
 
 	if opts.RaiseError && result.HasContent() {
 		os.Exit(1)
