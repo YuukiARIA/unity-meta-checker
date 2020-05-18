@@ -6,7 +6,7 @@ This command detects missing correspondence between Unity asset files and .meta 
 ## Installation
 ### Download binary
 
-__TBW__
+_TBW_
 
 ### Pull docker image
 
@@ -36,7 +36,7 @@ docker run --rm -v <UnityProjectPath>:/workspace:ro,cached yuukiaria/unity-meta-
 
 Display help and exit.
 
-### -p __path__, --project=__path__
+### -p _path_, --project=_path_
 
 Specify a path to Unity project, containing `Assets` folder.
 
@@ -46,6 +46,6 @@ Exit with non zero code when any paths are reported.
 
 If this option is not specified, exit with zero even if some paths are reported.
 
-### -o __path__, --output=__path__
+### -o _path_, --output=_path_
 
 Specify a path to file that reports be written to.
