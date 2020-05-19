@@ -13,3 +13,12 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# Builds
+builds/
+
+# Temporary files
+*~
+\#*#
+*.sw[po]
+.DS_Store
