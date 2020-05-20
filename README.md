@@ -49,3 +49,7 @@ If this option is not specified, exit with zero even if some paths are reported.
 ### -o _path_, --output=_path_
 
 Specify a path to file that reports be written to.
+
+### -t _path_, --template=_path_
+
+Specify a path to template file used to render reports.
