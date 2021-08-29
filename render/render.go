@@ -1,25 +1,18 @@
 package render
 
 import (
+	_ "embed"
 	"io"
 	"text/template"
 
 	"github.com/YuukiARIA/unity-meta-checker/models"
 )
 
-const defaultTemplateContent = `### Dangling .meta paths
-{{- range .DanglingMetaPaths }}
-- {{ . }}
-{{- end }}
-
-### Asset paths without .meta
-{{- range .MetalessAssetPaths }}
-- {{ . }}
-{{- end }}
-`
+//go:embed default_template.tpl
+var defaultTemplateContent []byte
 
 func GetDefaultTemplate() *template.Template {
-	return template.Must(template.New("default").Parse(defaultTemplateContent))
+	return template.Must(template.New("default").Parse(string(defaultTemplateContent)))
 }
 
 func LoadTemplate(path string) (*template.Template, error) {
